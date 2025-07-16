@@ -4,16 +4,27 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long expireTime = 1000 * 60 * 60;
-    private final long refreshExpireTime = 1000 * 60 * 60 * 24 * 7; // 7일 (추후에 한번 재발급 받으면 초기화되도록 수정)
+
+    private final SecretKey secretKey;
+    private final long expireTime;
+    private final long refreshExpireTime;
+
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.expire-time}") long expireTime,
+                   @Value("${jwt.refresh-expire-time}") long refreshExpireTime) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expireTime = expireTime;
+        this.refreshExpireTime = refreshExpireTime;
+    }
 
     public String generateToken(String username, String role) {
         return Jwts.builder()
@@ -21,7 +32,7 @@ public class JwtUtil {
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expireTime))
-                .signWith(secretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -38,12 +49,12 @@ public class JwtUtil {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpireTime))
-                .signWith(secretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims validateToken(String token) {
-        try{
+        try {
             return Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
@@ -51,6 +62,15 @@ public class JwtUtil {
                     .getBody();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return claims.getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true;
         }
     }
 }
