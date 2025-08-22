@@ -1,0 +1,5 @@
+spring:
+  data:
+    redis:
+      host: localhost # Docker가 localhost의 6379 포트를 컨테이너에 연결해 줌
+      port: 6379
