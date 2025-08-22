@@ -11,19 +11,21 @@ public class RedisController {
 
     private final RedisService redisService;
 
-    // 생성자 주입
     public RedisController(RedisService redisService) {
         this.redisService = redisService;
     }
 
-    // 데이터 저장을 위한 POST 요청
+    /**
+     * 반환 타입을 ResponseEntity<Integer>로 변경합니다.
+     * 서비스 계층에서 받은 결과(1)를 body에 담아 응답합니다.
+     */
     @PostMapping("/setValue")
-    public ResponseEntity<String> setValue(@RequestBody RedisRequestDto requestDto) {
-        redisService.setValue(requestDto.getKey(), requestDto.getValue());
-        return ResponseEntity.ok("Value set successfully");
+    public ResponseEntity<Integer> setValue(@RequestBody RedisRequestDto requestDto) {
+        int result = redisService.setValue(requestDto.getKey(), requestDto.getValue());
+        return ResponseEntity.ok(result);
     }
 
-    // 데이터 조회를 위한 GET 요청
+    // ... (다른 엔드포인트는 그대로)
     @GetMapping("/getValue/{key}")
     public ResponseEntity<String> getValue(@PathVariable String key) {
         String value = redisService.getValue(key);
@@ -31,12 +33,5 @@ public class RedisController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(value);
-    }
-
-    // 데이터 삭제를 위한 DELETE 요청
-    @DeleteMapping("/deleteValue/{key}")
-    public ResponseEntity<String> deleteValue(@PathVariable String key) {
-        redisService.deleteValue(key);
-        return ResponseEntity.ok("Value deleted successfully");
     }
 }
