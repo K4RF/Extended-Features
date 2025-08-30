@@ -28,6 +28,16 @@ jobs:
         run: ./gradlew build -x test
         working-directory: ./dockerEx/simple-docker-git-action
 
+#     단순 빌드 테스트트
       - name: Build Docker image
         run: docker build -t my-springboot .
         working-directory: ./dockerEx/simple-docker-git-action
+
+ # 실제 배포 서버가 없으므로 등록/배포 단계는 주석 처리
+    # - name: DockerHub 로그인 및 푸시 예시(옵션)
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+    # - name: Docker 이미지 등록
+    #   run: docker push my-springboot
