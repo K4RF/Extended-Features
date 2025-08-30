@@ -22,9 +22,12 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
+        working-directory: ./dockerEx/simple-docker-git-action
 
       - name: Build with Gradle (skip tests)
         run: ./gradlew build -x test
+        working-directory: ./dockerEx/simple-docker-git-action
 
       - name: Build Docker image
         run: docker build -t my-springboot .
+        working-directory: ./dockerEx/simple-docker-git-action
