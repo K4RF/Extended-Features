@@ -17,6 +17,8 @@ jwt:
   refresh-expire-time: ${JWT_REFRESH_EXPIRE:604800000}
 
 spring:
+  config:
+    import: optional:file:../.env[.properties],optional:file:.env[.properties]
   profiles:
     active: dev
   jpa:

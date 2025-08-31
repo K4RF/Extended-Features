@@ -35,4 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
+/src/main/java/dockerEx/project/.env
 /develop/docker-mysql/mysql_data/
