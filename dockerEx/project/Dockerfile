@@ -26,7 +26,7 @@ ENV SPRING_PROFILES_ACTIVE=prod
 # ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
 
 # 빌드 산출물 복사
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/social-0.0.1-SNAPSHOT.jar /app/social-0.0.1-SNAPSHOT.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java", "-jar", "social-0.0.1-SNAPSHOT.jar"]
