@@ -50,7 +50,9 @@ public class EmailService {
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
-            helper.setFrom(from);
+            if (from != null && !from.isBlank()) {
+                helper.setFrom(from);
+            }
             helper.setSubject(subject);
             helper.setText(html, true); // HTML 활성화
             mailSender.send(message);
