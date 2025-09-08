@@ -1,8 +1,3 @@
-permissions:
-  contents: read
-  packages: write
-  id-token: write
-
 # 기본 작업 디렉터리: 리포지토리 루트 기준 dockerEx/project
 defaults:
   run:
@@ -12,7 +7,7 @@ steps:
   - name: Check out code
     uses: actions/checkout@v4
 
-  - name: Set up JDK 17 (Gradle cache enabled)
+  - name: Set up JDK 17 (Gradle cache)
     uses: actions/setup-java@v4
     with:
       distribution: temurin
@@ -35,6 +30,7 @@ steps:
       install: true
       driver-opts: image=moby/buildkit:latest
 
+
   # 선택: DockerHub 또는 GHCR 로그인 (레지스트리 푸시 시 활성화)
   # - name: Log in to DockerHub
   #   uses: docker/login-action@v3
@@ -49,7 +45,6 @@ steps:
       file: dockerEx/project/Dockerfile
       push: false
       tags: project-app:ci
-      # 캐시 최적화(선택)
       cache-from: type=gha
       cache-to: type=gha,mode=max
       # 빌드시 프로파일 전달이 필요하면 build-args 사용 가능
