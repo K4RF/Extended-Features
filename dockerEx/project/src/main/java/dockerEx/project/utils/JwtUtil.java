@@ -1,9 +1,9 @@
-package batch.project.utils;
+package dockerEx.project.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,20 +14,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private final SecretKey secretKey;
+    private final long expireTime;
+    private final long refreshExpireTime;
 
-    @Value("${jwt.access-token-expiration-ms}")
-    private long accessTokenExpirationMs;
-
-    @Value("${jwt.refresh-token-expiration-ms}")
-    private long refreshTokenExpirationMs;
-
-    private SecretKey secretKey;
-
-    @PostConstruct
-    public void init() {
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.expire-time}") long expireTime,
+                   @Value("${jwt.refresh-expire-time}") long refreshExpireTime) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expireTime = expireTime;
+        this.refreshExpireTime = refreshExpireTime;
     }
 
     public String generateToken(String username, String role) {
@@ -35,8 +31,8 @@ public class JwtUtil {
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs))
-                .signWith(secretKey)
+                .setExpiration(new Date(System.currentTimeMillis() + expireTime))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -52,8 +48,8 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
-                .signWith(secretKey)
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpireTime))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -65,9 +61,16 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            // In a real application, you should log the exception
-            // For example: log.warn("Invalid JWT token: {}", e.getMessage());
             return null;
+        }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return claims.getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true;
         }
     }
 }
